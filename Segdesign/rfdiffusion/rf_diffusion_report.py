@@ -374,8 +374,10 @@ def report_csv(pdb_folder, dssp_csv_folder, start_res, end_res, ss, threshold, f
                 success_l.append('Yes')
                 success_backbone_l.append(os.path.join(filter_folder, file))
         backbone_l.append(pdb_file_path)
+    segment = [f'{start_res}-{end_res}']*len(index_list)
     df_data = {
         "index": index_list,
+        'segment': segment,
         "design_ss8": design_ss8,
         "design_ss3": design_ss3,
         "H_prop": h_prop,

@@ -35,7 +35,7 @@ def parse_args():
                         help='Redesigned sequence region for cluster analysis')
     parser.add_argument("-t", "--threads", type=int, default=8,
                         help="MMseqs2 number of threads (default: 8)")
-    parser.add_argument("--min_seq_id", type=float, default=0.8,
+    parser.add_argument("--min_seq_id", type=float, default=None,
                         help="Minimum sequence similarity (default: 0.8)")
     parser.add_argument("--cov_mode", type=int, default=0,
                         help="Coverage mode (0 = bidirectional, 1 = query, default: 0)")
@@ -344,7 +344,7 @@ def get_start_end(input_str):
     return None, None
 
 
-def generate_final_mpnn_report(output_folder, top_percent, final_report_folder=None):
+def generate_final_mpnn_report(output_folder, top_percent, position_list, final_report_folder=None):
     """
     生成最终的mpnn_report.csv文件，包含所有序列
     
@@ -354,10 +354,13 @@ def generate_final_mpnn_report(output_folder, top_percent, final_report_folder=N
         final_report_folder: 最终报告输出文件夹（默认为output_folder）
     """
     print("生成最终的MPNN报告（包含所有序列）...")
-    
+    segment = position_list
+    if position_list and position_list[0].isalpha():  # 检查字符串非空且首字符是字母
+        segment = position_list[1:]  # 删除首字符
+
     # 确定最终报告输出路径
     if final_report_folder is None:
-        final_report_folder = output_folder
+        final_report_folder = output_folder.rsplit('/', 1)[0]
     
     # 只读取所有原始序列CSV文件
     seqs_csv_folder = os.path.join(output_folder, 'seqs_csv')
@@ -390,6 +393,7 @@ def generate_final_mpnn_report(output_folder, top_percent, final_report_folder=N
                 report_entry = {
                     'index': row['index'],
                     'backbone': row.get('backbone', ''),
+                    'segment': segment,
                     'ss8': row.get('ss8', ''),
                     'ss3': row.get('ss3', ''),
                     'H_prop': row.get('H_prop', ''),
@@ -407,7 +411,7 @@ def generate_final_mpnn_report(output_folder, top_percent, final_report_folder=N
     if report_data:
         final_report_path = os.path.join(final_report_folder, 'mpnn_report.csv')
         df_final = pd.DataFrame(report_data)
-        df_final.to_csv(final_report_path) #, index=False)
+        df_final.to_csv(final_report_path, index=False)
         
         print(f"最终MPNN报告已生成：{final_report_path}")
         print(f"包含 {len(report_data)} 条记录")
@@ -437,6 +441,7 @@ if __name__ == "__main__":
     output_folder = os.path.expanduser(args.output_folder)
     top_percent = args.top_percent
     rfdiffusion_report_path = args.rfdiffusion_report_path
+    position_list = args.position_list
     
     print("=== MPNN序列处理和报告生成 ===")
     print(f"输入序列文件夹: {seq_folder}")
@@ -453,8 +458,8 @@ if __name__ == "__main__":
 
 
         
-        # 如果提供了position_list，进行聚类分析
-        if args.position_list and top_csv_files:
+        # 如果提供了args.min_seq_id，进行聚类分析
+        if args.min_seq_id and top_csv_files:
             print(f"\n开始聚类分析...")
             threads = args.threads
             min_seq_id = args.min_seq_id
@@ -463,7 +468,7 @@ if __name__ == "__main__":
             mmseqs_path = args.mmseqs_path
             sensitivity = args.sensitivity
             
-            start, end = get_start_end(args.position_list)
+            start, end = get_start_end(position_list)
             if start is not None and end is not None:
                 # 创建result文件夹在mpnn_out目录下
                 results_folder = os.path.join(output_folder, 'results')
@@ -516,7 +521,7 @@ if __name__ == "__main__":
 
         # 生成最终报告
         if args.generate_report:
-            final_report_path = generate_final_mpnn_report(output_folder, top_percent, args.final_report_folder)
+            final_report_path = generate_final_mpnn_report(output_folder, top_percent, position_list, args.final_report_folder)
             if final_report_path:
                 print(f"\n[SUCCESS] 完整MPNN报告生成完成！")
                 print(f"[OUTPUT] 主要输出文件:")

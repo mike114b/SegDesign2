@@ -365,7 +365,6 @@ def merge_configs(config_path: str, setting_path: str) -> dict:
     hmmer_args = hmmer_setting.get("args", {})  # 无"args"则返回{}
     hmmer_user = profile or {}
     hmmer_args.update(hmmer_user)
-    hmmer_env = setting_config["environments"].get("hmmer",setting_config["environments"]["main_env"])
 
     rfdiffusion_setting = setting_config.get("rfdiffusion", {})
     rfdiffusion_args = rfdiffusion_setting.get("args", {})
@@ -387,7 +386,7 @@ def merge_configs(config_path: str, setting_path: str) -> dict:
     esmfold_user = esmfold or {}
     esmfold_args.update(esmfold_user)
 
-
+    main_env = setting_config["environments"]["main_env"]
 
 
     # 全局参数配置 (profile)
@@ -400,6 +399,9 @@ def merge_configs(config_path: str, setting_path: str) -> dict:
 
     # hmmer 配置 (profile)
     if profile is not None:
+        hmmer_env = setting_config["environments"].get("hmmer", main_env)
+        if hmmer_env is None:
+            hmmer_env = main_env
         hmmer_output_folder = os.path.join(output_dir, hmmer_args.get("output_folder", "hmmer_out"))
         hmmer_bitscore = hmmer_args.get("bitscore", 0.3)
         hmmer_n_iter = hmmer_args.get("n_iter", 5)
@@ -455,7 +457,9 @@ def merge_configs(config_path: str, setting_path: str) -> dict:
                 modules["rfdiffusion"]["args"]["contigmap.inpaint_seq"] = rfdiffusion_args.get("contigmap.inpaint_seq")
 
             # RFdiffusion_report 配置
-            rfdiffusion_report_env = setting_config["environments"].get("rfdiffusion_report", setting_config["environments"]["main_env"])
+            rfdiffusion_report_env = setting_config["environments"].get("rfdiffusion_report", main_env)
+            if rfdiffusion_report_env is None:
+                rfdiffusion_report_env = main_env
             threshold = rfdiffusion_args.get("threshold", 0.6)
             modules["rfdiffusion_report"] = {
                 "env_name": rfdiffusion_report_env,
@@ -520,7 +524,9 @@ def merge_configs(config_path: str, setting_path: str) -> dict:
             }
 
             # mpnn_report 配置
-            mpnn_report_env = setting_config["environments"].get("mpnn_report",setting_config["environments"]["main_env"])
+            mpnn_report_env = setting_config["environments"].get("mpnn_report", main_env)
+            if mpnn_report_env is None:
+                mpnn_report_env = main_env
             seq_folder = os.path.join(mpnn_output_folder, "seqs")
             mpnn_report_output_folder = mpnn_output_folder
             top_percent = mpnn_args.get("top_percent", 0.5)
@@ -534,7 +540,8 @@ def merge_configs(config_path: str, setting_path: str) -> dict:
                     "top_percent": top_percent,
                     "generate_report": True,  # 添加生成报告标志
                     "final_report_folder": output_dir,  # 新增：最终报告输出到总工作目录
-                    "rfdiffusion_report_path": rfdiffusion_report_path
+                    "rfdiffusion_report_path": rfdiffusion_report_path,
+                    "position_list": position_list,
                 }
             }
             # 聚类分析配置
@@ -547,7 +554,6 @@ def merge_configs(config_path: str, setting_path: str) -> dict:
                 sensitivity = mmseqs_args.get("s", mmseqs_args.get("sensitivity", 4.0))
 
                 mpnn_report_args_add = {
-                    "position_list": position_list,
                     "threads": threads,
                     "min_seq_id": min_seq_id,
                     "cov_mode": cov_mode,
@@ -594,10 +600,13 @@ def merge_configs(config_path: str, setting_path: str) -> dict:
             }
 
             # esmfold_report 配置
-            esmfold_report_env = setting_config["environments"].get("esmfold_report",setting_config["environments"]["main_env"])
+            esmfold_report_env = setting_config["environments"].get("esmfold_report", main_env)
+            if esmfold_report_env is None:
+                esmfold_report_env = main_env
             fasta_folder = esmfold_input_folder
             esmfold_folder = esmfold_output_folder
-            plddt_threshold = esmfold_args.get("plddt_threshold", 70)
+            plddt_threshold = esmfold_args.get("plddt_threshold")
+            ptm_threshold = esmfold_args.get("ptm_threshold")
             if esmfold_args.get("original_protein_chain_path") is not None:
                 original_protein_chain_path = esmfold_args.get("original_protein_chain_path")
             else:
@@ -613,8 +622,8 @@ def merge_configs(config_path: str, setting_path: str) -> dict:
             modules["esmfold_report"] = {
                 "env_name": esmfold_report_env,
                 "args": {
-                    "fasta_folder": fasta_folder,
                     "esmfold_folder": esmfold_folder,
+                    'ptm_threshold': ptm_threshold,
                     "plddt_threshold": plddt_threshold,
                     "original_protein_chain_path": original_protein_chain_path,
                     "seq_range_str": seq_range_str,

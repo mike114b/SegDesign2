@@ -1,15 +1,15 @@
 # 模块配置
 environments:
-  main_env: SE3nv
-  hmmer: hmmer
-  rfdiffusion: SE3nv
-  rfdiffusion_report: SE3nv
-  mpnn: mpnn
-  mpnn_report: mpnn
-  dssp: hmmer
-  cluster_analysis: mpnn
+  main_env: segdesign
+  hmmer: 
+  rfdiffusion: segdesign_SE3nv
+  rfdiffusion_report: 
+  mpnn: segdesign_SE3nv
+  mpnn_report: 
+  dssp: 
+  cluster_analysis: 
   esmfold: esmfold
-  esmfold_report: esmfold_report
+  esmfold_report: 
 
 
 # 模块默认参数
@@ -24,16 +24,16 @@ rfdiffusion:
   args:
     #dssp_analyse:
          #- yes
-    run_inference_path: /home/wangxuming/SegDesign2/RFdiffusion/scripts/run_inference.py
+    run_inference_path: ./RFdiffusion/scripts/run_inference.py
     output_folder: rfdiffusion_out
     diffuser.partial_T: 50
     
 mpnn:
   args:
-    parse_multiple_chains_path: "/home/wangxuming/SegDesign2/ProteinMPNN/helper_scripts/parse_multiple_chains.py"
-    assign_fixed_chains_path: "/home/wangxuming/SegDesign2/ProteinMPNN/helper_scripts/assign_fixed_chains.py"
-    make_fixed_positions_dict_path: "/home/wangxuming/SegDesign2/ProteinMPNN/helper_scripts/make_fixed_positions_dict.py"
-    protein_mpnn_run_path: "/home/wangxuming/SegDesign2/ProteinMPNN/protein_mpnn_run.py"
+    parse_multiple_chains_path: "./ProteinMPNN/helper_scripts/parse_multiple_chains.py"
+    assign_fixed_chains_path: "./ProteinMPNN/helper_scripts/assign_fixed_chains.py"
+    make_fixed_positions_dict_path: "./ProteinMPNN/helper_scripts/make_fixed_positions_dict.py"
+    protein_mpnn_run_path: "./ProteinMPNN/protein_mpnn_run.py"
     pdb_folder: 
     output_folder: mpnn_out
     top_percent: 0.5

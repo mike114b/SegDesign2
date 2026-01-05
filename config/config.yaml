@@ -1,5 +1,5 @@
 project:
-  anaconda_path: /opt/software/anaconda3
+  anaconda_path: 
   input_pdb: ./Dusp4.pdb
   output_dir: ./Dusp4_example
   chain: A
@@ -7,7 +7,7 @@ project:
   segment: 346-394  # 如果为None则只执行profile部分分析，不跑后续设计
 
 profile:
-  database: ./uniprot_sprot.fasta
+  database: ./example/uniprot_sprot.fasta
   bitscore: 0.3
   n_iter: 5
   cpu: 10
@@ -31,4 +31,5 @@ mmseqs:
   c: 1.0
 
 esmfold:
+  ptm_threshold: 0.54
   plddt_threshold: 70

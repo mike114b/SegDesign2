@@ -4,12 +4,9 @@ import subprocess
 import shlex
 import argparse
 import re
-from pathlib import Path
 import os
-import pandas as pd
-import shutil
 import math
-from cluster_analysis import cluster_analysis
+
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Protein sequence prediction', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
