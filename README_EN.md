@@ -53,26 +53,36 @@ SegDesign/
 #### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/SegDesign.git
-cd SegDesign
+git clone https://github.com/mike114b/SegDesign2.git
+cd SegDesign2
 ```
 
 #### 2. Install Conda Environments
 
-The project requires multiple conda environments for different modules. Run the installation scripts:
+The project requires 3 conda environments to run different modules:
+- **segdesign**: Main environment containing HMMER, MMSeqs2, DSSP, etc.
+- **segdesign_esmfold**: For running ESMFold model
+- **segdesign_SE3nv**: For running RFdiffusion model and ProteinMPNN model
+
+We provide installation scripts in the `environments/` directory for user convenience. Before running the scripts, ensure that Conda or Miniconda is installed. You can use CONDA_PATH to specify the Conda installation path. If not specified, ensure conda runs properly and the script will use the conda run command to install environments.
+
+Please run the installation scripts:
 
 ```bash
+# You can set CONDA_PATH to specify Conda installation path, but this is optional
+CONDA_PATH="/path/to/your/anaconda3"
+
 # Install main environment (HMMER, MMSeqs2, DSSP, etc.)
-bash environments/segdesign_env.sh
+bash ./environments/segdesign_env.sh
 
-# Set your conda path if not in default location
-export CONDA_PATH="/path/to/your/anaconda3"
+# Install SE3nv environment (containing RFdiffusion and ProteinMPNN)
+bash ./environments/segdesign_SE3nv_env.sh
 
-# Install ESMFold environment (requires CUDA)
-bash environments/esmfold_env.sh
+# Install ESMFold environment (requires CUDA support)
+bash ./environments/esmfold_env.sh
 ```
 
-#### 3. Install Additional Databases (Optional)
+#### 3. Install Databases (Optional)
 
 For HMMER analysis, you may need to download sequence databases:
 
@@ -86,11 +96,11 @@ bash environments/download_uniref100.sh
 
 #### 4. Configure Paths
 
-Edit `config/setting.yaml` to configure the paths for:
+You can edit `config/setting.yaml` file to configure the following paths:
 - Anaconda installation path
 - RFdiffusion installation path
-- ProteinMPNN installation paths
-- Database paths
+- ProteinMPNN installation path
+In general, you don't need to modify these paths, using default values is fine.
 
 ## 📋 Configuration
 
@@ -100,8 +110,8 @@ The user configuration file controls the workflow parameters:
 
 ```yaml
 project:
-  anaconda_path: /path/to/anaconda3  # Your anaconda installation
-  input_pdb: ./Dusp4.pdb             # Input protein structure
+  anaconda_path:                     # Anaconda installation path, leave empty to use conda run command
+  input_pdb: ./Dusp4.pdb             # Input protein structure file
   output_dir: ./output               # Output directory
   chain: A                           # Chain to analyze
   sequence_length: 394               # Full sequence length
@@ -141,19 +151,20 @@ Run the complete pipeline:
 python Segdesign.py --config config/config.yaml
 ```
 
-### Module Execution
+### Individual Module Execution
 
 Individual modules can be run separately:
 
 ```bash
-# Run only sequence analysis
-python Segdesign.py --config config/config.yaml --modules hmmer
+# Run sequence analysis only
+ conda run -n segdesign python ./SegDesign2/Segdesign/hmmer/hmmer.py --input_pdb ./Dusp4.pdb --select_chain A --output_folder ./Dusp4_example/hmmer_out --bitscore 0.3 --n_iter 5 --database ./uniprot_sprot.fasta --cpu 10 --minimum_sequence_coverage 50 --minimum_column_coverage 70 --final_report_folder ./Dusp4_example
 
-# Run structure generation and design
-python Segdesign.py --config config/config.yaml --modules rfdiffusion,mpnn
 
-# Run structure validation
-python Segdesign.py --config config/config.yaml --modules esmfold
+# Run protein backbone design only
+conda run -n segdesign_SE3nv python /home/wangxuming/SegDesign2_test/Segdesign/rfdiffusion/rf_diffusion.py --run_inference_path ./RFdiffusion/scripts/run_inference.py --inference.input_pdb ./Dusp4.pdb --inference.output_prefix ./Dusp4_example/rfdiffusion_out/sample/Dusp4_A --inference.num_designs 10 --contigmap.contigs '[A1-394]' --contigmap.inpaint_str '[A346-394]' --diffuser.partial_T 50 --contigmap.inpaint_str_strand '[A346-394]'
+
+# Run structure prediction only
+conda run -n segdesign_esmfold python ./SegDesign2/Segdesign/esmfold/esmfold.py --input_pdb ./Dusp4.pdb --output_folder ./Dusp4_example/esmfold_out --ptm_threshold 0.54 --plddt_threshold 70
 ```
 
 ### Example: Dusp4 Protein Design
@@ -191,7 +202,7 @@ output/
 | backbone | Source backbone structure |
 | segment | Designed region |
 | score | Design score |
-| plddt_score | ESMFold pLDDT confidence |
+| plddt_score | ESMFold pLDDT confidence score |
 | ptm_score | ESMFold PTM score |
 | whether_pass | Quality control pass status |
 
@@ -242,27 +253,6 @@ source $CONDA_PATH/etc/profile.d/conda.sh
 - Verify database paths in `config/setting.yaml`
 - Ensure databases are properly formatted
 - Check file permissions
-
-## 📝 Citation
-
-If you use SegDesign in your research, please cite:
-
-```bibtex
-@misc{segdesign2024,
-  title = {SegDesign: Intelligent Protein Segment Design Pipeline},
-  author = {Your Name},
-  year = {2024},
-  url = {https://github.com/yourusername/SegDesign}
-}
-```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## 📧 Contact
 

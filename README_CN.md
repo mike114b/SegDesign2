@@ -53,23 +53,33 @@ SegDesign/
 #### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/yourusername/SegDesign.git
-cd SegDesign
+git clone https://github.com/mike114b/SegDesign2.git
+cd SegDesign2
 ```
 
 #### 2. 安装 Conda 环境
 
-项目需要多个 conda 环境来运行不同的模块。请运行安装脚本：
+项目需要3个 conda 环境来运行不同的模块，分别是：
+- **segdesign**：主环境，包含 HMMER、MMSeqs2、DSSP 等工具
+- **segdesign_esmfold**：用于运行 ESMFold 模型
+- **segdesign_SE3nv**：用于运行 RFdiffusion 模型 和 ProteinMPNN 模型
+
+为方便用户安装环境，我们提供了安装脚本，位于 `environments/` 目录下。在运行脚本前，请确保已安装 Conda 或 Miniconda，您可以使用 CONDA_PATH 指定 Conda 安装路径，若未指定，则确保 conda 可以正常运行，脚本将使用 conda run 命令来安装环境。
+
+请运行安装脚本：
 
 ```bash
-# 安装主环境（HMMER、MMSeqs2、DSSP 等）
-bash environments/segdesign_env.sh
+# 您可以设置 CONDA_PATH 来指定 Conda 安装路径，但这一步不是必须的
+CONDA_PATH="/path/to/your/anaconda3"
 
-# 如果 conda 不在默认路径，请设置
-export CONDA_PATH="/path/to/your/anaconda3"
+# 安装主环境（HMMER、MMSeqs2、DSSP 等）
+bash ./environments/segdesign_env.sh
+
+# 安装 SE3nv 环境（包含 RFdiffusion 和 ProteinMPNN）
+bash ./environments/segdesign_SE3nv_env.sh
 
 # 安装 ESMFold 环境（需要 CUDA 支持）
-bash environments/esmfold_env.sh
+bash ./environments/esmfold_env.sh
 ```
 
 #### 3. 安装数据库（可选）
@@ -86,11 +96,11 @@ bash environments/download_uniref100.sh
 
 #### 4. 配置路径
 
-编辑 `config/setting.yaml` 文件，配置以下路径：
+您可以编辑 `config/setting.yaml` 文件，配置以下路径：
 - Anaconda 安装路径
 - RFdiffusion 安装路径
 - ProteinMPNN 安装路径
-- 数据库路径
+一般情况下，您无需修改这些路径，使用默认值即可。
 
 ## 📋 配置文件说明
 
@@ -100,7 +110,7 @@ bash environments/download_uniref100.sh
 
 ```yaml
 project:
-  anaconda_path: /path/to/anaconda3  # Anaconda 安装路径
+  anaconda_path:                     # Anaconda 安装路径，不写则使用 conda run 命令
   input_pdb: ./Dusp4.pdb             # 输入的蛋白质结构文件
   output_dir: ./output               # 输出目录
   chain: A                           # 待分析的链
@@ -147,13 +157,14 @@ python Segdesign.py --config config/config.yaml
 
 ```bash
 # 仅运行序列分析
-python Segdesign.py --config config/config.yaml --modules hmmer
+ conda run -n segdesign python ./SegDesign2/Segdesign/hmmer/hmmer.py --input_pdb ./Dusp4.pdb --select_chain A --output_folder ./Dusp4_example/hmmer_out --bitscore 0.3 --n_iter 5 --database ./uniprot_sprot.fasta --cpu 10 --minimum_sequence_coverage 50 --minimum_column_coverage 70 --final_report_folder ./Dusp4_example
 
-# 仅运行结构生成和设计
-python Segdesign.py --config config/config.yaml --modules rfdiffusion,mpnn
 
-# 仅运行结构验证
-python Segdesign.py --config config/config.yaml --modules esmfold
+# 仅运行蛋白质骨架设计
+conda run -n segdesign_SE3nv python /home/wangxuming/SegDesign2_test/Segdesign/rfdiffusion/rf_diffusion.py --run_inference_path ./RFdiffusion/scripts/run_inference.py --inference.input_pdb ./Dusp4.pdb --inference.output_prefix ./Dusp4_example/rfdiffusion_out/sample/Dusp4_A --inference.num_designs 10 --contigmap.contigs '[A1-394]' --contigmap.inpaint_str '[A346-394]' --diffuser.partial_T 50 --contigmap.inpaint_str_strand '[A346-394]'
+
+# 仅运行结构预测
+conda run -n segdesign_esmfold python ./SegDesign2/Segdesign/esmfold/esmfold.py --input_pdb ./Dusp4.pdb --output_folder ./Dusp4_example/esmfold_out --ptm_threshold 0.54 --plddt_threshold 70
 ```
 
 ### 示例：Dusp4 蛋白质设计
@@ -242,27 +253,6 @@ source $CONDA_PATH/etc/profile.d/conda.sh
 - 验证 `config/setting.yaml` 中的数据库路径
 - 确保数据库格式正确
 - 检查文件权限
-
-## 📝 引用
-
-如果您在研究中使用了 SegDesign，请引用：
-
-```bibtex
-@misc{segdesign2024,
-  title = {SegDesign: Intelligent Protein Segment Design Pipeline},
-  author = {Your Name},
-  year = {2024},
-  url = {https://github.com/yourusername/SegDesign}
-}
-```
-
-## 📄 许可证
-
-本项目采用 MIT 许可证 - 详情请参阅 [LICENSE](LICENSE) 文件。
-
-## 🤝 贡献
-
-欢迎贡献代码！请随时提交 Pull Request。
 
 ## 📧 联系方式
 
