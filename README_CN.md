@@ -164,7 +164,7 @@ example 目录提供了一个完整的配置文件示例，您可以参考该文
 该示例使用的蛋白质数据库为 uniprot_sprot.fasta，您可以使用 download_uniprot_sprot.sh 脚本下载该数据库。
 
 ```bash
-bash environments/download_uniprot_sprot.sh
+bash example/download_uniprot_sprot.sh
 ```
 
 完整运行一次 pipeline 示例：
@@ -179,14 +179,14 @@ python Segdesign.py --config config/config.yaml
 
 ```bash
 # 仅运行序列分析
- conda run -n segdesign python ./SegDesign2/Segdesign/hmmer/hmmer.py --input_pdb ./Dusp4.pdb --select_chain A --output_folder ./Dusp4_example/hmmer_out --bitscore 0.3 --n_iter 5 --database ./uniprot_sprot.fasta --cpu 10 --minimum_sequence_coverage 50 --minimum_column_coverage 70 --final_report_folder ./Dusp4_example
+ conda run -n segdesign python ./Segdesign/hmmer/hmmer.py --input_pdb ./Dusp4.pdb --select_chain A --output_folder ./Dusp4_example/hmmer_out --bitscore 0.3 --n_iter 5 --database ./uniprot_sprot.fasta --cpu 10 --minimum_sequence_coverage 50 --minimum_column_coverage 70 --final_report_folder ./Dusp4_example
 
 
 # 仅运行蛋白质骨架设计
-conda run -n segdesign_SE3nv python /home/wangxuming/SegDesign2_test/Segdesign/rfdiffusion/rf_diffusion.py --run_inference_path ./RFdiffusion/scripts/run_inference.py --inference.input_pdb ./Dusp4.pdb --inference.output_prefix ./Dusp4_example/rfdiffusion_out/sample/Dusp4_A --inference.num_designs 10 --contigmap.contigs '[A1-394]' --contigmap.inpaint_str '[A346-394]' --diffuser.partial_T 50 --contigmap.inpaint_str_strand '[A346-394]'
+conda run -n segdesign_SE3nv python ./Segdesign/rfdiffusion/rf_diffusion.py --run_inference_path ./RFdiffusion/scripts/run_inference.py --inference.input_pdb ./Dusp4.pdb --inference.output_prefix ./Dusp4_example/rfdiffusion_out/sample/Dusp4_A --inference.num_designs 10 --contigmap.contigs '[A1-394]' --contigmap.inpaint_str '[A346-394]' --diffuser.partial_T 50 --contigmap.inpaint_str_strand '[A346-394]'
 
 # 仅运行结构预测
-conda run -n esmfold python /home/wangxuming/SegDesign2_test/Segdesign/esmfold/esmfold.py --input_folder ./Dusp4_example/mpnn_out/results --output_folder ./Dusp4_example/esmfold_out
+conda run -n segdesign_esmfold python ./Segdesign/esmfold/esmfold.py --input_folder ./Dusp4_example/mpnn_out/results --output_folder ./Dusp4_example/esmfold_out
 ```
 
 ### 示例：Dusp4 蛋白质设计

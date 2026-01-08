@@ -166,7 +166,7 @@ The example directory provides a complete configuration file example that you ca
 This example uses the protein database uniprot_sprot.fasta, which you can download using the download_uniprot_sprot.sh script.
 
 ```bash
-bash environments/download_uniprot_sprot.sh
+bash example/download_uniprot_sprot.sh
 ```
 
 Run the complete pipeline:
@@ -181,14 +181,14 @@ Individual modules can be run separately:
 
 ```bash
 # Run sequence analysis only
- conda run -n segdesign python ./SegDesign2/Segdesign/hmmer/hmmer.py --input_pdb ./Dusp4.pdb --select_chain A --output_folder ./Dusp4_example/hmmer_out --bitscore 0.3 --n_iter 5 --database ./uniprot_sprot.fasta --cpu 10 --minimum_sequence_coverage 50 --minimum_column_coverage 70 --final_report_folder ./Dusp4_example
+ conda run -n segdesign python ./Segdesign/hmmer/hmmer.py --input_pdb ./Dusp4.pdb --select_chain A --output_folder ./Dusp4_example/hmmer_out --bitscore 0.3 --n_iter 5 --database ./uniprot_sprot.fasta --cpu 10 --minimum_sequence_coverage 50 --minimum_column_coverage 70 --final_report_folder ./Dusp4_example
 
 
 # Run protein backbone design only
-conda run -n segdesign_SE3nv python /home/wangxuming/SegDesign2_test/Segdesign/rfdiffusion/rf_diffusion.py --run_inference_path ./RFdiffusion/scripts/run_inference.py --inference.input_pdb ./Dusp4.pdb --inference.output_prefix ./Dusp4_example/rfdiffusion_out/sample/Dusp4_A --inference.num_designs 10 --contigmap.contigs '[A1-394]' --contigmap.inpaint_str '[A346-394]' --diffuser.partial_T 50 --contigmap.inpaint_str_strand '[A346-394]'
+conda run -n segdesign_SE3nv python ./Segdesign/rfdiffusion/rf_diffusion.py --run_inference_path ./RFdiffusion/scripts/run_inference.py --inference.input_pdb ./Dusp4.pdb --inference.output_prefix ./Dusp4_example/rfdiffusion_out/sample/Dusp4_A --inference.num_designs 10 --contigmap.contigs '[A1-394]' --contigmap.inpaint_str '[A346-394]' --diffuser.partial_T 50 --contigmap.inpaint_str_strand '[A346-394]'
 
 # Run structure prediction only
-conda run -n esmfold python /home/wangxuming/SegDesign2_test/Segdesign/esmfold/esmfold.py --input_folder ./Dusp4_example/mpnn_out/results --output_folder ./Dusp4_example/esmfold_out
+conda run -n segdesign_esmfold python ./Segdesign/esmfold/esmfold.py --input_folder ./Dusp4_example/mpnn_out/results --output_folder ./Dusp4_example/esmfold_out
 ```
 
 ### Example: Dusp4 Protein Design
