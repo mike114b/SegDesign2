@@ -328,6 +328,7 @@ def report_csv(pdb_folder, dssp_csv_folder, start_res, end_res, ss, threshold, f
     success_backbone_l = []
     if len(pdb_files_path_list) != len(csv_files_path_list):
         raise ValueError("pdb文件的数量与dssp文件对应的csv文件数量不符，请检查！")
+    num_f = 0
     for pdb_file_path, csv_file_path, file_name, file in zip(pdb_files_path_list, csv_files_path_list, file_name_list, matched_pdb_files):
         index_list.append(file_name)
         design_seq8, useless = csv_column_ratio_with_list(
@@ -358,6 +359,7 @@ def report_csv(pdb_folder, dssp_csv_folder, start_res, end_res, ss, threshold, f
                 success_backbone_l.append('-')
             else:
                 success_l.append('Yes')
+                num_f += 1
                 success_backbone_l.append(os.path.join(filter_folder, file))
         if ss == 'strand':
             if e_prop[-1] < threshold:
@@ -365,6 +367,7 @@ def report_csv(pdb_folder, dssp_csv_folder, start_res, end_res, ss, threshold, f
                 success_backbone_l.append('-')
             else:
                 success_l.append('Yes')
+                num_f += 1
                 success_backbone_l.append(os.path.join(filter_folder, file))
         if ss == 'coil':
             if c_prop[-1] < threshold:
@@ -372,6 +375,7 @@ def report_csv(pdb_folder, dssp_csv_folder, start_res, end_res, ss, threshold, f
                 success_backbone_l.append('-')
             else:
                 success_l.append('Yes')
+                num_f += 1
                 success_backbone_l.append(os.path.join(filter_folder, file))
         backbone_l.append(pdb_file_path)
     segment = [f'{start_res}-{end_res}']*len(index_list)
@@ -389,7 +393,7 @@ def report_csv(pdb_folder, dssp_csv_folder, start_res, end_res, ss, threshold, f
     }
     df_data = pd.DataFrame(df_data)
     df_data.to_csv(f'{out_folder}/rfdiffusion_report.csv', index=False)
-    return
+    return num_f
 
 
 
@@ -441,7 +445,8 @@ if __name__ == '__main__':
         out_folder = final_report_folder
     else:
         out_folder = work_dir
-    report_csv(
+
+    nf = report_csv(
         pdb_folder=pdb_folder,
         dssp_csv_folder = dssp_csv_folder,
         start_res = start_res,
@@ -451,6 +456,8 @@ if __name__ == '__main__':
         filter_folder = filter_folder,
         out_folder = out_folder,
     )
+    if nf == 0:
+        raise ValueError(f"没有蛋白质骨架通过筛选，不进行后续操作。")
     
     
 
